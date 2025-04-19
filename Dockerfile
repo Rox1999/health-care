@@ -7,6 +7,6 @@ RUN npm install
 
 COPY ui/ .
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD ["npm", "start"]
