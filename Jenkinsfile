@@ -5,6 +5,7 @@ pipeline {
         IMAGE_NAME = "rox1999/star-agile-health-care"
         TEST_SERVER = "13.233.198.245"
         PROD_SERVER = "35.154.164.60"
+        NODE_PORT = "30080"  // Example port for NodePort, change as needed
     }
 
     stages {
@@ -43,7 +44,7 @@ pipeline {
                 sshagent(['root-server-key']) {
                     sh """
                         ssh root@$TEST_SERVER 'kubectl delete pod healthcare-app --ignore-not-found=true'
-                        ssh root@$TEST_SERVER 'cat <<EOF | kubectl apply -f -
+                        ssh root@$TEST_SERVER 'cat <<EOF | kubectl apply -f - 
 apiVersion: v1
 kind: Pod
 metadata:
@@ -54,6 +55,22 @@ spec:
     image: $IMAGE_NAME:latest
     ports:
     - containerPort: 8080
+EOF'
+
+                        ssh root@$TEST_SERVER 'cat <<EOF | kubectl apply -f - 
+apiVersion: v1
+kind: Service
+metadata:
+  name: healthcare-service
+spec:
+  type: NodePort
+  selector:
+    app: healthcare-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: $NODE_PORT
 EOF'
                     """
                 }
@@ -83,6 +100,22 @@ spec:
     image: $IMAGE_NAME:latest
     ports:
     - containerPort: 8080
+EOF'
+
+                        ssh root@$PROD_SERVER 'cat <<EOF | kubectl apply -f - 
+apiVersion: v1
+kind: Service
+metadata:
+  name: healthcare-service
+spec:
+  type: NodePort
+  selector:
+    app: healthcare-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: $NODE_PORT
 EOF'
                     """
                 }
