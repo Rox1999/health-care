@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/Rox1999/star-agile-health-care.git', branch: 'master'
+                git url: 'https://github.com/Rox1999/health-care.git', branch: 'master'
             }
         }
 
